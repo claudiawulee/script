@@ -13,41 +13,6 @@
     </header>
 
     <main class="grid">
-      <section class="card" data-room="MAT201">
-        <div class="room-title">MAT201</div>
-
-        <div class="row">
-          <div class="label">Tutors</div>
-          <button onclick="changeCount('MAT201', 'tutors', -1)">-</button>
-          <input type="number" min="0" class="tutors" oninput="setCount('MAT201', 'tutors')">
-          <button onclick="changeCount('MAT201', 'tutors', 1)">+</button>
-        </div>
-
-        <div class="row">
-          <div class="label">Students</div>
-          <button onclick="changeCount('MAT201', 'students', -1)">-</button>
-          <input type="number" min="0" class="students" oninput="setCount('MAT201', 'students')">
-          <button onclick="changeCount('MAT201', 'students', 1)">+</button>
-        </div>
-      </section>
-
-      <section class="card" data-room="MOL214">
-        <div class="room-title">MOL214</div>
-
-        <div class="row">
-          <div class="label">Tutors</div>
-          <button onclick="changeCount('MOL214', 'tutors', -1)">-</button>
-          <input type="number" min="0" class="tutors" oninput="setCount('MOL214', 'tutors')">
-          <button onclick="changeCount('MOL214', 'tutors', 1)">+</button>
-        </div>
-
-        <div class="row">
-          <div class="label">Students</div>
-          <button onclick="changeCount('MOL214', 'students', -1)">-</button>
-          <input type="number" min="0" class="students" oninput="setCount('MOL214', 'students')">
-          <button onclick="changeCount('MOL214', 'students', 1)">+</button>
-        </div>
-      </section>
     </main>
 
     <footer>
@@ -55,7 +20,8 @@
       <a href="index.html">Homepage</a>
     </footer>
   </div>
-
+<!-- Displays Cards -->
+  <script src="classes.js"></script>
   <script src="admin.js"></script>
 </body>
 </html>
