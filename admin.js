@@ -1,3 +1,7 @@
+// Shared Firebase imports/initialization
+import { db, ref, set } from './firebase.js';
+
+
 // Prevents crash if classes.js doesn't load
 let defaultStateAdmin
 if (window.buildDefaultState) {
@@ -44,8 +48,7 @@ function getActiveTab() {
 }
 
 function saveCounts() {
-  // turns JS object to string to store in localStorage
-  localStorage.setItem("roomCounts", JSON.stringify(state));
+  set(ref(db, "roomCounts"), state);
 }
 
 // Generates the tab buttons (1 for each tutoring session)
@@ -86,7 +89,7 @@ function generateAdminTabs() {
     // Renames button to day of the week and time of session
     button.textContent = tab.title;
 
-    // If this tab is the tab user clicks on, it will be "active" and highlighted on frontend
+    // If this tab is the tab user clicks on, it will be "active" and highlighted 
     if (tab.id === activeTab) {
       button.classList.add("active");
     }
@@ -247,6 +250,10 @@ function resetAll() {
   saveCounts();
   renderInputs();
 }
+
+window.changeCount = changeCount;
+window.setCount = setCount;
+window.resetAll = resetAll;
 
 generateAdminTabs();
 generateAdminCards();
