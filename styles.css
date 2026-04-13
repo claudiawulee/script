@@ -71,3 +71,13 @@ body {
       background: #f8fafc;
       border-radius: 6px;
     }
+    
+    .green { color: #2ecc71; }
+    .orange { color: #f39c12; }
+    .red { color: #e74c3c; }
+    .gray { color: #7f8c8d; }
+
+    .room-status {
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
