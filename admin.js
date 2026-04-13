@@ -2,6 +2,7 @@
 import { db, ref, set } from './firebase.js';
 
 
+
 // Prevents crash if classes.js doesn't load
 let defaultStateAdmin
 if (window.buildDefaultState) {

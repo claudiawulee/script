@@ -22,7 +22,8 @@ jobs:
             projectId: "${{ secrets.PROJECTID }}",
             storageBucket: "${{ secrets.STORAGEBUCKET }}",
             messagingSenderId: "${{ secrets.MESSAGINGSENDERID }}",
-            appId: "${{ secrets.APPID }}"
+            appId: "${{ secrets.APPID }}",
+            measurementId: "${{ secrets.MEASUREMENTID }}"
           };
           EOF
 
