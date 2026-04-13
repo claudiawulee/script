@@ -252,10 +252,15 @@ function resetAll() {
   renderInputs();
 }
 
-window.changeCount = changeCount;
-window.setCount = setCount;
-window.resetAll = resetAll;
+function initializeAdmin() {
+  generateAdminTabs();
+  generateAdminCards();
+  renderInputs();
+}
 
-generateAdminTabs();
-generateAdminCards();
-renderInputs();
+// Only run when classes.js has definitely loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeAdmin);
+} else {
+  initializeAdmin();
+}
