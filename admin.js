@@ -1,5 +1,5 @@
 // Shared Firebase imports/initialization
-import { db, ref, set } from './firebase.js';
+import { db, ref, set, onValue } from './firebase.js';
 
 
 
@@ -11,19 +11,30 @@ if (window.buildDefaultState) {
   defaultStateAdmin = {};
 }
 
-let state = loadState();
+let state = buildEmptyState();
 
-// Load saved counts from localStorage or initialize with default values (0s)
-function loadState() {
-  // either get saved counts or nothing if no saved counts
-  const saved = JSON.parse(localStorage.getItem("roomCounts") || "{}");
+function buildEmptyState() {
   const res = {};
-  // Gets all room names from classes.js and sets the saved counts else put 0s in
+
   Object.keys(defaultStateAdmin).forEach(room => {
-    res[room] = saved[room] || { tutors: 0, students: 0 };
+    res[room] = { tutors: 0, students: 0 };
   });
-  // returns rooms and their counts
+
   return res;
+}
+
+function listenForCounts() {
+  onValue(ref(db, "roomCounts"), snapshot => {
+    const data = snapshot.val() || {};
+    const newState = {};
+
+    Object.keys(defaultStateAdmin).forEach(room => {
+      newState[room] = data[room] || { tutors: 0, students: 0 };
+    });
+
+    state = newState;
+    renderInputs();
+  });
 }
 
 // Get the tab that is currently selected (when user clicks on tab it displays corresponding tab's info)
@@ -256,6 +267,7 @@ function initializeAdmin() {
   generateAdminTabs();
   generateAdminCards();
   renderInputs();
+  listenForCounts();
 }
 
 // Only run when classes.js has definitely loaded
