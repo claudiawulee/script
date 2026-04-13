@@ -1,12 +1,6 @@
-// Shared Firebase imports/initialization
 import { db, ref, onValue } from "./firebase.js";
 
-// =========================
-// HELPERS
-// =========================
-
 // Make a unique key for each class in each tab/session
-// Example: "sun-afternoon__R-Programming"
 function getSessionRoomKey(tabId, room) {
   return `${tabId}__${room}`;
 }
@@ -26,7 +20,7 @@ function buildDisplayDefaultState() {
   return state;
 }
 
-// Return color + label + icon based on tutor/student ratio
+// Return color/label based on tutor/student ratio
 function getRoomStatus(tutors, students) {
   if (tutors === 0) {
     return { className: "gray", label: "Closed", icon: "⚪" };
@@ -51,11 +45,6 @@ const defaultState = buildDisplayDefaultState();
 // Current live state
 let state = { ...defaultState };
 
-
-// =========================
-// FIREBASE
-// =========================
-
 // Listen for live updates from Firebase
 function listenForCounts() {
   onValue(ref(db, "roomCounts"), snapshot => {
@@ -70,11 +59,6 @@ function listenForCounts() {
     renderCounts();
   });
 }
-
-
-// =========================
-// ACTIVE TAB
-// =========================
 
 // Get the currently selected tab
 function getActiveTabId() {
@@ -99,10 +83,6 @@ function setActiveTabId(tabId) {
   localStorage.setItem("activeTab", tabId);
 }
 
-
-// =========================
-// TABS UI
-// =========================
 
 // Build the tab buttons
 function generateTabs() {
@@ -143,10 +123,6 @@ function generateTabs() {
   });
 }
 
-
-// =========================
-// CARD UI
-// =========================
 
 // Build the cards for the current tab
 function generateCards() {
@@ -189,11 +165,6 @@ function generateCards() {
   });
 }
 
-
-// =========================
-// RENDER
-// =========================
-
 // Fill cards with counts + status
 function renderCounts() {
   generateTabs();
@@ -227,10 +198,5 @@ function renderCounts() {
     statusText.className = `room-status ${status.className}`;
   });
 }
-
-
-// =========================
-// INITIALIZE
-// =========================
 
 listenForCounts();

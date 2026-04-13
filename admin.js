@@ -1,18 +1,12 @@
-// Shared Firebase imports/initialization
 import { db, ref, set, onValue } from "./firebase.js";
 
-// =========================
-// HELPERS
-// =========================
-
 // Make a unique key for each class in each tab/session
-// Example: "sun-afternoon__R-Programming"
 function getSessionRoomKey(tabId, room) {
   return `${tabId}__${room}`;
 }
 
 // Build default state using tab + room
-// This keeps repeated classes in different sessions separate
+// keeps repeated classes in different sessions separate
 function buildAdminDefaultState() {
   const state = {};
   const tabs = window.CLASS_TABS || [];
@@ -27,16 +21,11 @@ function buildAdminDefaultState() {
   return state;
 }
 
-// Default empty state
+// empty state
 const defaultStateAdmin = buildAdminDefaultState();
 
 // Current live state
 let state = { ...defaultStateAdmin };
-
-
-// =========================
-// FIREBASE
-// =========================
 
 // Save current state to Firebase
 function saveCounts() {
@@ -58,11 +47,6 @@ function listenForCounts() {
   });
 }
 
-
-// =========================
-// ACTIVE TAB
-// =========================
-
 // Get the currently selected tab
 function getActiveTab() {
   const tabs = window.CLASS_TABS || [];
@@ -81,10 +65,6 @@ function getActiveTab() {
   return null;
 }
 
-
-// =========================
-// TABS UI
-// =========================
 
 // Generate tab buttons
 function generateAdminTabs() {
@@ -132,10 +112,6 @@ function generateAdminTabs() {
 }
 
 
-// =========================
-// CARD UI
-// =========================
-
 // Generate cards for the active tab
 function generateAdminCards() {
   const main = document.querySelector("main.grid");
@@ -174,7 +150,7 @@ function createRoomHTML(room, roomKey) {
   `;
 }
 
-// Build one row (Tutors or Students)
+// Build one row 
 function createRow(label, roomKey, type) {
   return `
     <div class="row">
@@ -186,10 +162,6 @@ function createRow(label, roomKey, type) {
   `;
 }
 
-
-// =========================
-// RENDER INPUTS
-// =========================
 
 // Show current values in each input
 function renderInputs() {
@@ -208,11 +180,7 @@ function renderInputs() {
 }
 
 
-// =========================
-// UPDATE COUNTS
-// =========================
-
-// Change count when + or - is clicked
+// update count when + or - is clicked
 function changeCount(roomKey, type, amount) {
   if (!state[roomKey]) {
     state[roomKey] = { tutors: 0, students: 0 };
@@ -250,11 +218,6 @@ function setCount(roomKey, type) {
   saveCounts();
 }
 
-
-// =========================
-// RESET
-// =========================
-
 // Reset all session/class counts to 0
 function resetAll() {
   const newState = {};
@@ -268,10 +231,6 @@ function resetAll() {
   renderInputs();
 }
 
-
-// =========================
-// INITIALIZE
-// =========================
 
 function initializeAdmin() {
   generateAdminTabs();
