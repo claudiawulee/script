@@ -1,0 +1,34 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Create Firebase config file
+        run: |
+          cat > firebase.config.js <<EOF
+          export const FIREBASE_CONFIG = {
+            apiKey: "${{ secrets.APIKEY }}",
+            authDomain: "${{ secrets.AUTHDOMAIN }}",
+            databaseURL: "${{ secrets.DATABASEURL }}",
+            projectId: "${{ secrets.PROJECTID }}",
+            storageBucket: "${{ secrets.STORAGEBUCKET }}",
+            messagingSenderId: "${{ secrets.MESSAGINGSENDERID }}",
+            appId: "${{ secrets.APPID }}",
+            measurementId: "${{ secrets.MEASUREMENTID }}"
+          };
+          EOF
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .

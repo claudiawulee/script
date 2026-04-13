@@ -1,0 +1,6 @@
+# Ignore generated Firebase config that contains real credentials
+# /script/firebase.config.js
+firebase.config.js
+
+# Local dev env file
+.env

@@ -1,3 +1,5 @@
+// Each tab is a tutoring session
+// each session has a list of classes that are tutored during that session
 window.CLASS_TABS = [
   {
     id: "sun-afternoon",
@@ -52,7 +54,6 @@ window.getClassesForTab = function (tabId) {
     return tab.classes;
   }
 
-  // If tab not found, return empty list
   return [];
 };
 
