@@ -246,20 +246,21 @@ function setCount(room, type) {
 }
 
 
-// Reset every room back to 0 tutors and 0 students
 function resetAll() {
   const newState = {};
 
-  // Go through every room in the default state
+  // Set all rooms to 0
   Object.keys(defaultStateAdmin).forEach(room => {
     newState[room] = { tutors: 0, students: 0 };
   });
 
-  // Replace old state with the new reset state
+  // Update state
   state = newState;
 
-  // Save updated data and refresh the inputs on screen
+  // Save to Firebase
   saveCounts();
+
+  // Update UI
   renderInputs();
 }
 
@@ -269,6 +270,10 @@ function initializeAdmin() {
   renderInputs();
   listenForCounts();
 }
+window.changeCount = changeCount;
+window.setCount = setCount;
+window.resetAll = resetAll;
+
 
 // Only run when classes.js has definitely loaded
 if (document.readyState === 'loading') {
