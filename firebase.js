@@ -7,11 +7,13 @@ import {
   signOut,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+
 import { FIREBASE_CONFIG } from "./firebase.config.js";
 
 const app = initializeApp(FIREBASE_CONFIG);
 
 const db = getDatabase(app);
+
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
