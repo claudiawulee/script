@@ -12,15 +12,22 @@
       <h1>Admin - McGraw Tutoring Tracker</h1>
     </header>
 
-    <main class="grid">
-    </main>
+    <div id="authGate">
+      <p id="authMessage">Please sign in with Google to access the admin page.</p>
+      <button id="signInBtn">Sign in with Google</button>
+      <button id="signOutBtn">Sign out</button>
+    </div>
 
-    <footer>
-      <button class="secondary" onclick="resetAll()">Reset all to 0</button>
-      <a href="index.html">Homepage</a>
-    </footer>
+    <div id="adminContent" style="display: none;">
+      <main class="grid"></main>
+
+      <footer>
+        <button class="secondary" onclick="resetAll()">Reset all to 0</button>
+        <a href="index.html">Homepage</a>
+      </footer>
+    </div>
   </div>
-<!-- Displays Cards -->
+
   <script src="classes.js"></script>
   <script type="module" src="admin.js"></script>
 </body>
