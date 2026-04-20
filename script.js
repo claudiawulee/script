@@ -1,4 +1,5 @@
 import { db, ref, onValue } from "./firebase.js";
+import { setupNavbar } from "./navbar.js";
 
 // Make a unique key for each class in each tab/session
 function getSessionRoomKey(tabId, room) {
@@ -198,5 +199,5 @@ function renderCounts() {
     statusText.className = `room-status ${status.className}`;
   });
 }
-
+setupNavbar();
 listenForCounts();

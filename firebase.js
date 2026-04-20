@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+import { getDatabase, ref, onValue, set, push } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
 import {
   getAuth,
   GoogleAuthProvider,
@@ -13,7 +13,6 @@ import { FIREBASE_CONFIG } from "./firebase.config.js";
 const app = initializeApp(FIREBASE_CONFIG);
 
 const db = getDatabase(app);
-
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
@@ -26,5 +25,6 @@ export {
   provider,
   signInWithPopup,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  push
 };
