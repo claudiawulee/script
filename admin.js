@@ -1,3 +1,4 @@
+import { setupAuth } from "./auth.js";
 import { db, ref, set, onValue } from "./firebase.js";
 
 // Make a unique key for each class in each tab/session
@@ -26,6 +27,8 @@ const defaultStateAdmin = buildAdminDefaultState();
 
 // Current live state
 let state = { ...defaultStateAdmin };
+
+let adminStarted = false;
 
 // Save current state to Firebase
 function saveCounts() {
@@ -58,11 +61,7 @@ function getActiveTab() {
     }
   }
 
-  if (tabs.length > 0) {
-    return tabs[0].id;
-  }
-
-  return null;
+  return tabs.length > 0 ? tabs[0].id : null;
 }
 
 
@@ -239,6 +238,13 @@ function initializeAdmin() {
   listenForCounts();
 }
 
+function startAdminOnce() {
+  if (adminStarted) return;
+  adminStarted = true;
+  initializeAdmin();
+}
+
+
 // Make functions global so inline onclick/oninput works
 window.changeCount = changeCount;
 window.setCount = setCount;
@@ -246,7 +252,9 @@ window.resetAll = resetAll;
 
 // Wait until page is ready
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initializeAdmin);
+  document.addEventListener("DOMContentLoaded", function () {
+    setupAuth(startAdminOnce);
+  });
 } else {
-  initializeAdmin();
+  setupAuth(startAdminOnce);
 }
