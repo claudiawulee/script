@@ -51,11 +51,19 @@ body {
       }
     }
 
-    .card {
+    .card, #signInBtn, #signOutBtn {
       background: white;
       padding: 16px;
       border-radius: 10px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    #authGate {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 16px;
+      border-radius: 10px;
     }
 
     .room-title {
@@ -81,3 +89,31 @@ body {
       font-weight: 600;
       margin-bottom: 6px;
     }
+
+    .navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  color: white;
+  margin-bottom: 20px;
+}
+
+.nav-item {
+        background: #fff;
+      border: 1px solid rgba(0,0,0,0.08);
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+}
+
+.nav-item:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.active {
+        background: #ffb86b;
+      border-color: #ff9f3b;
+}
