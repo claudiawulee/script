@@ -1,6 +1,14 @@
 import { setupAuth } from "./auth.js";
 import { db, ref, set, onValue } from "./firebase.js";
-import { setupNavbar } from "./navbar.js";
+import { loadNavbar } from "./loadNavbar.js";
+import { initNavbar } from "./navbar.js";
+
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadNavbar();   // inject HTML first
+  initNavbar();         // then attach logic
+
+  // your existing logic
+});
 
 // Make a unique key for each class in each tab/session
 function getSessionRoomKey(tabId, room) {
@@ -250,7 +258,7 @@ function startAdminOnce() {
 window.changeCount = changeCount;
 window.setCount = setCount;
 window.resetAll = resetAll;
-setupNavbar();
+
 // Wait until page is ready
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", function () {

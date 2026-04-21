@@ -18,8 +18,14 @@ import {
 // Firebase auth object from your shared Firebase setup
 import { auth } from "./firebase.js";
 
-// Navbar setup
-import { setupNavbar } from "./navbar.js";
+import { loadNavbar } from "./loadnavbar.js";
+import { initNavbar } from "./navbar.js";
+
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadNavbar();   // inject HTML first
+  initNavbar();         // then attach logic
+
+});
 
 
 // Build dropdown options from CLASS_TABS
@@ -196,8 +202,6 @@ function setupChat() {
 }
 
 
-// Set up navbar
-setupNavbar();
 
 
 // Wait until page is loaded before running chat setup

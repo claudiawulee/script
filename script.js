@@ -1,5 +1,6 @@
 import { db, ref, onValue } from "./firebase.js";
-import { setupNavbar } from "./navbar.js";
+import { loadNavbar } from "./loadnavbar.js";
+import { initNavbar } from "./navbar.js";
 
 // Make a unique key for each class in each tab/session
 function getSessionRoomKey(tabId, room) {
@@ -21,7 +22,6 @@ function buildDisplayDefaultState() {
   return state;
 }
 
-// Return color/label based on tutor/student ratio
 function getRoomStatus(tutors, students) {
   if (tutors === 0) {
     return { className: "gray", label: "Closed", icon: "⚪" };
@@ -40,13 +40,9 @@ function getRoomStatus(tutors, students) {
   return { className: "red", label: "Full", icon: "🔴" };
 }
 
-// Default empty state
 const defaultState = buildDisplayDefaultState();
-
-// Current live state
 let state = { ...defaultState };
 
-// Listen for live updates from Firebase
 function listenForCounts() {
   onValue(ref(db, "roomCounts"), snapshot => {
     const data = snapshot.val() || {};
@@ -61,7 +57,6 @@ function listenForCounts() {
   });
 }
 
-// Get the currently selected tab
 function getActiveTabId() {
   const savedTab = localStorage.getItem("activeTab");
   const tabs = window.CLASS_TABS || [];
@@ -79,53 +74,10 @@ function getActiveTabId() {
   return null;
 }
 
-// Save selected tab
 function setActiveTabId(tabId) {
   localStorage.setItem("activeTab", tabId);
 }
 
-
-// Build the tab buttons
-function generateTabs() {
-  let tabsContainer = document.querySelector(".tabs");
-
-  // Create tabs container if needed
-  if (!tabsContainer) {
-    tabsContainer = document.createElement("div");
-    tabsContainer.className = "tabs";
-
-    const grid = document.querySelector(".grid");
-    if (grid && grid.parentNode) {
-      grid.parentNode.insertBefore(tabsContainer, grid);
-    }
-  }
-
-  // Clear old tabs
-  tabsContainer.innerHTML = "";
-
-  const tabs = window.CLASS_TABS || [];
-  const activeTab = getActiveTabId();
-
-  tabs.forEach(tab => {
-    const button = document.createElement("button");
-    button.className = "tab-btn";
-    button.textContent = tab.title;
-
-    if (tab.id === activeTab) {
-      button.classList.add("active");
-    }
-
-    button.addEventListener("click", function () {
-      setActiveTabId(tab.id);
-      renderCounts();
-    });
-
-    tabsContainer.appendChild(button);
-  });
-}
-
-
-// Build the cards for the current tab
 function generateCards() {
   const grid = document.querySelector(".grid");
   if (!grid) return;
@@ -166,9 +118,7 @@ function generateCards() {
   });
 }
 
-// Fill cards with counts + status
 function renderCounts() {
-  generateTabs();
   generateCards();
 
   const cards = document.querySelectorAll(".card");
@@ -181,11 +131,9 @@ function renderCounts() {
     const tutors = roomCounts.tutors;
     const students = roomCounts.students;
 
-    // Update number display
     card.querySelector(".tutors").textContent = tutors;
     card.querySelector(".students").textContent = students;
 
-    // Update status
     const status = getRoomStatus(tutors, students);
 
     const title = card.querySelector(".room-title");
@@ -199,5 +147,14 @@ function renderCounts() {
     statusText.className = `room-status ${status.className}`;
   });
 }
-setupNavbar();
-listenForCounts();
+
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadNavbar();
+
+  initNavbar((tabId) => {
+    setActiveTabId(tabId);
+    renderCounts();
+  });
+
+  listenForCounts();
+});
