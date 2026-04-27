@@ -1,5 +1,6 @@
 import { db, ref, onValue } from "./firebase.js";
-import { setupNavbar } from "./navbar.js";
+import { loadNavbar } from "./loadnavbar.js";
+import { initNavbar } from "./navbar.js";
 
 // Make a unique key for each class in each tab/session
 function getSessionRoomKey(tabId, room) {
@@ -21,7 +22,6 @@ function buildDisplayDefaultState() {
   return state;
 }
 
-// Return color/label based on tutor/student ratio
 function getRoomStatus(tutors, students) {
   if (tutors === 0) {
     return { className: "gray", label: "Closed", icon: "⚪" };
@@ -40,13 +40,37 @@ function getRoomStatus(tutors, students) {
   return { className: "red", label: "Full", icon: "🔴" };
 }
 
-// Default empty state
-const defaultState = buildDisplayDefaultState();
+function getCourseUrl(room) {
+  const courseMap = {
+      "CHM202": "https://registrar.princeton.edu/course-offerings/course-details?term=1264&courseid=000976",
+      "CHM215": "https://registrar.princeton.edu/course-offerings/course-details?term=1264&courseid=000983",
+      "CHM304": "https://registrar.princeton.edu/course-offerings/course-details?term=1264&courseid=000988",
+      "COS126": "https://registrar.princeton.edu/course-offerings/course-details?term=1272&courseid=002051",
+      "COS217": "https://registrar.princeton.edu/course-offerings/course-details?term=1272&courseid=002053",
+      "COS226": "https://registrar.princeton.edu/course-offerings/course-details?term=1272&courseid=002054",
+      "ECO100": "https://registrar.princeton.edu/course-offerings/course-details?term=1272&courseid=001381",
+      "ECO101": "https://registrar.princeton.edu/course-offerings/course-details?term=1272&courseid=001380",
+      "ECO202": "https://registrar.princeton.edu/course-offerings/course-details?term=1272&courseid=001386",
+      "EGR153": "https://registrar.princeton.edu/course-offerings/course-details?term=1264&courseid=014472",
+      "EGR154": "https://registrar.princeton.edu/course-offerings/course-details?term=1264&courseid=014473",
+      "MAT103": "https://registrar.princeton.edu/course-offerings/course-details?term=1272&courseid=004139",
+      "MAT104": "https://registrar.princeton.edu/course-offerings/course-details?term=1272&courseid=004140",
+      "MAT175": "https://registrar.princeton.edu/course-offerings/course-details?term=1272&courseid=012060",
+      "MAT201": "https://registrar.princeton.edu/course-offerings/course-details?term=1272&courseid=004149",
+      "MAT202": "https://registrar.princeton.edu/course-offerings/course-details?term=1272&courseid=004150",
+      "MOL214": "https://registrar.princeton.edu/course-offerings/course-details?term=1272&courseid=000876",
+      "ORF245": "https://registrar.princeton.edu/course-offerings/course-details?term=1272&courseid=007996",
+      "PHY102": "https://registrar.princeton.edu/course-offerings/course-details?term=1264&courseid=005125",
+      "PHY104": "https://registrar.princeton.edu/course-offerings/course-details?term=1264&courseid=005129",
+      "R-Programming": "https://registrar.princeton.edu/course-offerings/course-details?term=1264&courseid=013596"
+  };
 
-// Current live state
+  return courseMap[room] || "https://registrar.princeton.edu/";
+}
+
+const defaultState = buildDisplayDefaultState();
 let state = { ...defaultState };
 
-// Listen for live updates from Firebase
 function listenForCounts() {
   onValue(ref(db, "roomCounts"), snapshot => {
     const data = snapshot.val() || {};
@@ -61,7 +85,6 @@ function listenForCounts() {
   });
 }
 
-// Get the currently selected tab
 function getActiveTabId() {
   const savedTab = localStorage.getItem("activeTab");
   const tabs = window.CLASS_TABS || [];
@@ -79,53 +102,10 @@ function getActiveTabId() {
   return null;
 }
 
-// Save selected tab
 function setActiveTabId(tabId) {
   localStorage.setItem("activeTab", tabId);
 }
 
-
-// Build the tab buttons
-function generateTabs() {
-  let tabsContainer = document.querySelector(".tabs");
-
-  // Create tabs container if needed
-  if (!tabsContainer) {
-    tabsContainer = document.createElement("div");
-    tabsContainer.className = "tabs";
-
-    const grid = document.querySelector(".grid");
-    if (grid && grid.parentNode) {
-      grid.parentNode.insertBefore(tabsContainer, grid);
-    }
-  }
-
-  // Clear old tabs
-  tabsContainer.innerHTML = "";
-
-  const tabs = window.CLASS_TABS || [];
-  const activeTab = getActiveTabId();
-
-  tabs.forEach(tab => {
-    const button = document.createElement("button");
-    button.className = "tab-btn";
-    button.textContent = tab.title;
-
-    if (tab.id === activeTab) {
-      button.classList.add("active");
-    }
-
-    button.addEventListener("click", function () {
-      setActiveTabId(tab.id);
-      renderCounts();
-    });
-
-    tabsContainer.appendChild(button);
-  });
-}
-
-
-// Build the cards for the current tab
 function generateCards() {
   const grid = document.querySelector(".grid");
   if (!grid) return;
@@ -142,33 +122,40 @@ function generateCards() {
   rooms.forEach(room => {
     const roomKey = getSessionRoomKey(activeTab, room);
 
-    const card = document.createElement("div");
-    card.className = "card";
-    card.dataset.room = room;
-    card.dataset.roomKey = roomKey;
+    const card = document.createElement("a");
+card.className = "card";
+card.dataset.room = room;
+card.dataset.roomKey = roomKey;
+card.target = "_blank";
+card.rel = "noopener noreferrer";
+card.href = getCourseUrl(room);
 
     card.innerHTML = `
-      <div class="room-title">${room}</div>
-      <div class="room-status"></div>
+  <div class="card-overlay">
+    <span class="overlay-text">Course Page →</span>
+  </div>
 
-      <div class="count">
-        <span>Tutors</span>
-        <span class="tutors">0</span>
-      </div>
+  <div class="card-content">
+    <div class="room-title">${room}</div>
+    <div class="room-status"></div>
 
-      <div class="count">
-        <span>Students</span>
-        <span class="students">0</span>
-      </div>
-    `;
+    <div class="count">
+      <span>Tutors</span>
+      <span class="tutors">0</span>
+    </div>
+
+    <div class="count">
+      <span>Students</span>
+      <span class="students">0</span>
+    </div>
+  </div>
+`;
 
     grid.appendChild(card);
   });
 }
 
-// Fill cards with counts + status
 function renderCounts() {
-  generateTabs();
   generateCards();
 
   const cards = document.querySelectorAll(".card");
@@ -181,15 +168,16 @@ function renderCounts() {
     const tutors = roomCounts.tutors;
     const students = roomCounts.students;
 
-    // Update number display
     card.querySelector(".tutors").textContent = tutors;
     card.querySelector(".students").textContent = students;
 
-    // Update status
     const status = getRoomStatus(tutors, students);
 
     const title = card.querySelector(".room-title");
     const statusText = card.querySelector(".room-status");
+
+    card.classList.remove("green", "orange", "red", "gray");
+    card.classList.add(status.className);
 
     title.textContent = room;
     title.classList.remove("green", "orange", "red", "gray");
@@ -199,5 +187,14 @@ function renderCounts() {
     statusText.className = `room-status ${status.className}`;
   });
 }
-setupNavbar();
-listenForCounts();
+
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadNavbar();
+
+  initNavbar((tabId) => {
+    setActiveTabId(tabId);
+    renderCounts();
+  });
+
+  listenForCounts();
+});

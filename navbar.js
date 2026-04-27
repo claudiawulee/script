@@ -1,12 +1,10 @@
 import { auth, signOut, onAuthStateChanged } from "./firebase.js";
 
-// Emails that are allowed to see the Admin tab
 const ALLOWED_EMAILS = [
   "cl7359@princeton.edu",
   "claudialee57@gmail.com"
 ];
 
-// Check if signed-in user is an admin
 function isAdminEmail(email) {
   if (!email) return false;
 
@@ -15,103 +13,140 @@ function isAdminEmail(email) {
   );
 }
 
-// Figure out which page we are currently on
 function getCurrentPage() {
-  const path = window.location.pathname;
+  const path = window.location.pathname.toLowerCase();
 
   if (path.includes("admin.html")) return "admin";
   if (path.includes("chat.html")) return "chat";
   return "home";
 }
 
-// Create one navbar link
-function createNavLink(label, href, isActive) {
-  const link = document.createElement("a");
-  link.href = href;
-  link.className = "nav-item";
-  link.textContent = label;
-
-  if (isActive) {
-    link.classList.add("active");
-  }
-
-  return link;
+function getActiveTabId() {
+  return localStorage.getItem("activeTab") || window.CLASS_TABS?.[0]?.id || "";
 }
 
-// Create one navbar button
-function createButton(label, onClick) {
+function setActiveTabId(tabId) {
+  localStorage.setItem("activeTab", tabId);
+}
+
+function createSessionButton(tab, isActive, onTabChange) {
   const button = document.createElement("button");
-  button.className = "nav-btn";
-  button.textContent = label;
-  button.addEventListener("click", onClick);
+  button.type = "button";
+  button.className = "session-link";
+  button.textContent = tab.title;
+  button.dataset.tabId = tab.id;
+
+  if (isActive) {
+    button.classList.add("active");
+  }
+
+  button.addEventListener("click", () => {
+    setActiveTabId(tab.id);
+    renderDashboardMenu(onTabChange);
+
+    if (typeof onTabChange === "function") {
+      onTabChange(tab.id);
+    }
+  });
+
   return button;
 }
 
-// Sign user out and send them back home
-async function handleSignOut() {
-  try {
-    await signOut(auth);
-    window.location.href = "index.html";
-  } catch (error) {
-    console.error("Sign out failed:", error);
-  }
-}
+function renderDashboardMenu(onTabChange) {
+  const dashboardMenu = document.getElementById("dashboardMenu");
+  if (!dashboardMenu) return;
 
-// Build navbar based on whether user is signed in and whether they are admin
-function renderNavbar(user) {
-  const navbar = document.getElementById("navbar");
-  if (!navbar) return;
+  dashboardMenu.innerHTML = "";
 
-  navbar.innerHTML = "";
+  const tabs = window.CLASS_TABS || [];
+  const activeTabId = getActiveTabId();
 
-  const left = document.createElement("div");
-  left.className = "nav-left";
-
-  const right = document.createElement("div");
-  right.className = "nav-right";
-
-  const currentPage = getCurrentPage();
-  const isSignedIn = !!user;
-  const isAdmin = isAdminEmail(user?.email);
-
-  // Everyone sees Home
-  left.appendChild(
-    createNavLink("🏠 Home", "index.html", currentPage === "home")
-  );
-
-  // Signed-out users see Sign In
-  if (!isSignedIn) {
-    right.appendChild(
-      createNavLink("👤 Sign In", "admin.html", currentPage === "admin")
-    );
-  } else {
-    // Signed-in users see Chat
-    left.appendChild(
-      createNavLink("💬 Chat", "chat.html", currentPage === "chat")
-    );
-
-    // Admin users also see Admin
-    if (isAdmin) {
-      left.appendChild(
-        createNavLink("🔒 Admin", "admin.html", currentPage === "admin")
-      );
-    }
-
-    // Signed-in users see Sign Out
-    right.appendChild(
-      createButton("Sign Out", handleSignOut)
-    );
-  }
-
-  navbar.appendChild(left);
-  navbar.appendChild(right);
-}
-
-// Re-render navbar whenever auth state changes
-function setupNavbar() {
-  onAuthStateChanged(auth, user => {
-    renderNavbar(user);
+  tabs.forEach(tab => {
+    const button = createSessionButton(tab, tab.id === activeTabId, onTabChange);
+    dashboardMenu.appendChild(button);
   });
 }
 
-export { setupNavbar };
+function setActiveNavLink() {
+  const currentPage = getCurrentPage();
+  const navLinks = document.querySelectorAll(".nav-link[data-page]");
+
+  navLinks.forEach(link => {
+    const page = link.dataset.page;
+
+    if (
+      (currentPage === "home" && (page === "home" || page === "dashboard")) ||
+      page === currentPage
+    ) {
+      link.classList.add("active");
+    } else {
+      link.classList.remove("active");
+    }
+  });
+}
+
+function setupDashboardBehavior() {
+  const dashboardLink = document.getElementById("dashboardLink");
+  const dashboardMenu = document.getElementById("dashboardMenu");
+  const dashboardSymbol = document.getElementById("dashboardSymbol");
+
+  if (!dashboardLink || !dashboardMenu || !dashboardSymbol) return;
+
+  const isHomePage = getCurrentPage() === "home";
+
+  if (isHomePage) {
+    // Default: open on first load
+    dashboardMenu.classList.remove("hidden");
+    dashboardSymbol.textContent = "-";
+
+    dashboardLink.addEventListener("click", (e) => {
+      e.preventDefault(); // stay on index
+
+      const isHidden = dashboardMenu.classList.contains("hidden");
+
+      dashboardMenu.classList.toggle("hidden");
+      dashboardSymbol.textContent = isHidden ? "-" : "+";
+    });
+
+  } else {
+    // Other pages → always "+"
+    dashboardMenu.classList.add("hidden");
+    dashboardSymbol.textContent = "+";
+    // no click handler needed (normal navigation)
+  }
+}
+
+function setupSignOut() {
+  const signOutBtn = document.getElementById("signOutBtn");
+  if (!signOutBtn) return;
+
+  signOutBtn.addEventListener("click", async () => {
+    try {
+      await signOut(auth);
+      window.location.href = "index.html";
+    } catch (error) {
+      console.error("Sign out failed:", error);
+      alert("Could not sign out. Please try again.");
+    }
+  });
+}
+
+function setupAdminVisibility() {
+  const adminLink = document.querySelector('.nav-link[data-page="admin"]');
+  if (!adminLink) return;
+
+  onAuthStateChanged(auth, user => {
+    const userEmail = user?.email || "";
+    const isAdmin = isAdminEmail(userEmail);
+
+    adminLink.style.display = isAdmin ? "inline-flex" : "none";
+  });
+}
+
+export function initNavbar(onTabChange) {
+  setActiveNavLink();
+  renderDashboardMenu(onTabChange);
+  setupDashboardBehavior();
+  setupSignOut();
+  setupAdminVisibility();
+}
