@@ -29,23 +29,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 // Build dropdown options from CLASS_TABS
-// Each option is one class/session combination
+// Each option is one class
 function buildClassOptions() {
-  const options = [];
+  const uniqueClasses = new Set();
 
   (window.CLASS_TABS || []).forEach(tab => {
     (tab.classes || []).forEach(room => {
-      const classKey = `${tab.id}__${room}`;
-      const classLabel = `${tab.title} — ${room}`;
-
-      options.push({
-        key: classKey,
-        label: classLabel
-      });
+      uniqueClasses.add(room);
     });
   });
 
-  return options;
+  return [...uniqueClasses].sort().map(courseCode => ({
+    key: courseCode,
+    label: courseCode
+  }));
 }
 
 
