@@ -1,53 +1,33 @@
-import {
-  db,
-  ref,
-  onValue
-} from "./firebase.js";
-
-import {
-  getAuth,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-
+import { db, ref, onValue, auth } from "./firebase.js";
 import {
   push,
-  set,
-  serverTimestamp
+  set
 } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
-
-// Firebase auth object from your shared Firebase setup
-import { auth } from "./firebase.js";
+import {
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
 import { loadNavbar } from "./loadnavbar.js";
 import { initNavbar } from "./navbar.js";
 
-document.addEventListener("DOMContentLoaded", async () => {
-  await loadNavbar();   // inject HTML first
-  initNavbar();         // then attach logic
+let selectedClass = "";
+let allMessages = [];
 
-});
-
-
-// Build dropdown options from CLASS_TABS
-// Each option is one class/session combination
+// Build dropdown options from unique course codes only
 function buildClassOptions() {
-  const options = [];
+  const uniqueClasses = new Set();
 
   (window.CLASS_TABS || []).forEach(tab => {
     (tab.classes || []).forEach(room => {
-      const classKey = `${tab.id}__${room}`;
-      const classLabel = `${tab.title} — ${room}`;
-
-      options.push({
-        key: classKey,
-        label: classLabel
-      });
+      uniqueClasses.add(room);
     });
   });
 
-  return options;
+  return [...uniqueClasses].sort().map(courseCode => ({
+    key: courseCode,
+    label: courseCode
+  }));
 }
-
 
 // Fill the class dropdown on the chat page
 function populateClassDropdown() {
@@ -63,8 +43,14 @@ function populateClassDropdown() {
     el.textContent = option.label;
     select.appendChild(el);
   });
-}
 
+  selectedClass = select.value;
+
+  select.addEventListener("change", () => {
+    selectedClass = select.value;
+    renderFilteredMessages();
+  });
+}
 
 // Format timestamp into readable date + time
 function formatDateTime(timestamp) {
@@ -80,17 +66,15 @@ function formatDateTime(timestamp) {
   });
 }
 
-
-// Show all messages on the page
+// Show messages on the page
 function renderMessages(messages) {
   const container = document.getElementById("messages");
   if (!container) return;
 
   container.innerHTML = "";
 
-  // Show placeholder if no messages yet
   if (messages.length === 0) {
-    container.innerHTML = `<p class="empty-chat">No messages yet.</p>`;
+    container.innerHTML = `<p class="empty-chat">No messages yet for ${selectedClass}.</p>`;
     return;
   }
 
@@ -110,10 +94,19 @@ function renderMessages(messages) {
     container.appendChild(item);
   });
 
-  // Auto-scroll to newest message
   container.scrollTop = container.scrollHeight;
 }
 
+// Filter messages by selected class
+function renderFilteredMessages() {
+  if (!selectedClass) {
+    renderMessages(allMessages);
+    return;
+  }
+
+  const filtered = allMessages.filter(msg => msg.classKey === selectedClass);
+  renderMessages(filtered);
+}
 
 // Listen for live updates from Firebase chatMessages
 function listenForMessages() {
@@ -127,13 +120,12 @@ function listenForMessages() {
       ...data[id]
     }));
 
-    // Sort messages oldest to newest
     messages.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
 
-    renderMessages(messages);
+    allMessages = messages;
+    renderFilteredMessages();
   });
 }
-
 
 // Send a new message to Firebase
 async function sendMessage(user) {
@@ -144,13 +136,10 @@ async function sendMessage(user) {
 
   const text = input.value.trim();
   const classKey = select.value;
-  const classLabel = select.options[select.selectedIndex]?.text || "";
+  const classLabel = classKey;
 
-  // Stop if message is empty or no class is selected
-  if (!text) return;
-  if (!classKey) return;
+  if (!text || !classKey) return;
 
-  // Only signed-in users can send
   if (!user) {
     alert("You must be signed in to send messages.");
     return;
@@ -159,7 +148,6 @@ async function sendMessage(user) {
   const messagesRef = ref(db, "chatMessages");
   const newMessageRef = push(messagesRef);
 
-  // Save message in Firebase
   await set(newMessageRef, {
     classKey,
     classLabel,
@@ -168,10 +156,8 @@ async function sendMessage(user) {
     timestamp: Date.now()
   });
 
-  // Clear input after sending
   input.value = "";
 }
-
 
 // Set up the chat page
 function setupChat() {
@@ -183,17 +169,14 @@ function setupChat() {
 
   let currentUser = null;
 
-  // Keep track of current signed-in user
   onAuthStateChanged(auth, user => {
     currentUser = user || null;
   });
 
-  // Send message when button is clicked
   sendBtn.addEventListener("click", () => {
     sendMessage(currentUser);
   });
 
-  // Send message when Enter is pressed
   input.addEventListener("keydown", event => {
     if (event.key === "Enter") {
       sendMessage(currentUser);
@@ -201,12 +184,8 @@ function setupChat() {
   });
 }
 
-
-
-
-// Wait until page is loaded before running chat setup
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", setupChat);
-} else {
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadNavbar();
+  initNavbar();
   setupChat();
-}
+});
