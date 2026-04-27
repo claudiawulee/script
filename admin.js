@@ -1,13 +1,12 @@
 import { setupAuth } from "./auth.js";
 import { db, ref, set, onValue } from "./firebase.js";
-import { loadNavbar } from "./loadNavbar.js";
+import { loadNavbar } from "./loadnavbar.js";
 import { initNavbar } from "./navbar.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
   await loadNavbar();   // inject HTML first
   initNavbar();         // then attach logic
 
-  // your existing logic
 });
 
 // Make a unique key for each class in each tab/session

@@ -182,7 +182,7 @@ h1 {
 }
 
 /* CARDS + AUTH */
-.card,
+
 #signInBtn,
 #signOutBtn {
   background: white;
@@ -196,6 +196,88 @@ h1 {
   padding: 16px;
   border-radius: 10px;
 }
+
+.card {
+  position: relative;
+  display: block;
+  text-decoration: none;
+  color: inherit;
+
+  background: white;
+  padding: 20px;
+  border-radius: 16px; /* clean rounded rectangle */
+
+  /* IMPORTANT */
+  overflow: hidden; /* keep this for overlay clipping */
+
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 16px rgba(0, 0, 0, 0.12);
+}
+
+.card-content {
+  position: relative;
+  z-index: 1;
+}
+
+.card-overlay {
+  position: absolute;
+  inset: 0; /* fills entire card */
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  /* background: rgba(220, 80, 80, 0.881); */
+
+  border-radius: 16px;
+  z-index: 2;
+}
+
+/* tinted overlays by status */
+.card.green .card-overlay {
+  background: rgba(71, 222, 127, 0.468);
+}
+
+.card.orange .card-overlay {
+  background: rgba(252, 179, 51, 0.52);
+}
+
+.card.red .card-overlay {
+  background: rgba(255, 64, 64, 0.484);
+}
+
+.card.gray .card-overlay {
+  background: rgba(107, 114, 128, 0.22);
+}
+
+/* Shows the shadow overlay */
+.card:hover .card-overlay {
+  opacity: 1;
+}
+
+
+.overlay-text {
+  color: white;
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+/* slightly dim underlying content on hover */
+.card-content {
+  transition: filter 0.25s ease;
+}
+
+
 
 /* ROOM STATUS */
 .room-title {
