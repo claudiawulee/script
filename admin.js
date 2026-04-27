@@ -3,11 +3,7 @@ import { db, ref, set, onValue } from "./firebase.js";
 import { loadNavbar } from "./loadnavbar.js";
 import { initNavbar } from "./navbar.js";
 
-document.addEventListener("DOMContentLoaded", async () => {
-  await loadNavbar();   // inject HTML first
-  initNavbar();         // then attach logic
 
-});
 
 // Make a unique key for each class in each tab/session
 function getSessionRoomKey(tabId, room) {
@@ -259,10 +255,9 @@ window.setCount = setCount;
 window.resetAll = resetAll;
 
 // Wait until page is ready
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", function () {
-    setupAuth(startAdminOnce);
-  });
-} else {
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadNavbar();
+  initNavbar();
+
   setupAuth(startAdminOnce);
-}
+});
