@@ -1,4 +1,10 @@
-import { auth, signOut, onAuthStateChanged } from "./firebase.js";
+import {
+  auth,
+  provider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged
+} from "./firebase.js";
 
 const ALLOWED_EMAILS = [
   "cl7359@princeton.edu",
@@ -115,10 +121,23 @@ function setupDashboardBehavior() {
     // no click handler needed (normal navigation)
   }
 }
-
-function setupSignOut() {
+function setupAuthButtons() {
+  const signInBtn = document.getElementById("signInBtn");
   const signOutBtn = document.getElementById("signOutBtn");
-  if (!signOutBtn) return;
+
+  if (!signInBtn || !signOutBtn) {
+    console.error("Navbar auth buttons not found");
+    return;
+  }
+
+  signInBtn.addEventListener("click", async () => {
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      console.error("Sign in failed:", error);
+      alert("Sign in failed.");
+    }
+  });
 
   signOutBtn.addEventListener("click", async () => {
     try {
@@ -126,7 +145,17 @@ function setupSignOut() {
       window.location.href = "index.html";
     } catch (error) {
       console.error("Sign out failed:", error);
-      alert("Could not sign out. Please try again.");
+      alert("Sign out failed.");
+    }
+  });
+
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      signInBtn.style.display = "none";
+      signOutBtn.style.display = "inline-flex";
+    } else {
+      signInBtn.style.display = "inline-flex";
+      signOutBtn.style.display = "none";
     }
   });
 }
@@ -147,6 +176,6 @@ export function initNavbar(onTabChange) {
   setActiveNavLink();
   renderDashboardMenu(onTabChange);
   setupDashboardBehavior();
-  setupSignOut();
+  setupAuthButtons();
   setupAdminVisibility();
 }
